@@ -8,7 +8,6 @@
 #define TILE_SIZE (16.0F * TILE_SCALE)
 #define WIDTH (TILE_SIZE * 20.0F)
 #define HEIGHT (TILE_SIZE * 20.0F)
-#define VECTOR_ADD(a,b) ((a).x + (b).x, (a).y + (b).y)
 
 struct Window {
     int width, height;
