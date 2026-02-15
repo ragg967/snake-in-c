@@ -10,9 +10,9 @@
 #define HEIGHT (TILE_SIZE * 20)
 
 struct Window {
-    int width, height;
-    char *name;
-    bool gameRunning;
+  int width, height;
+  char *name;
+  bool gameRunning;
 };
 
 struct Window window = {
@@ -23,21 +23,21 @@ struct Window window = {
 };
 
 struct SnakeSegment {
-    Vector2 position;
-    const char *texturePath;
-    Texture texture;
+  Vector2 position;
+  const char *texturePath;
+  Texture texture;
 };
 
 struct Snake {
-    unsigned int movementDirection: 2;
-    unsigned int segmentCount;
-    struct SnakeSegment segments[];
+  unsigned int movementDirection : 2;
+  unsigned int segmentCount;
+  struct SnakeSegment segments[];
 };
 
 struct Apple {
-    Vector2 position;
-    const char *texturePath;
-    Texture texture;
+  Vector2 position;
+  const char *texturePath;
+  Texture texture;
 };
 
 struct Snake *initSnake(const char *texturePath, Texture texture);
@@ -51,137 +51,146 @@ void checkWallCollision(const struct Snake *snake);
 struct Apple *initApple(const char *texturePath, Texture texture);
 
 int main(void) {
-    InitWindow(window.width, window.height, window.name);
-    SetTargetFPS(5);
+  InitWindow(window.width, window.height, window.name);
+  SetTargetFPS(5);
 
-    const char *snakeTexturePath = "../assets/snake-body.png";
-    const Texture snakeTexture = LoadTexture(snakeTexturePath);
+  const char *snakeTexturePath = "assets/snake-body.png";
+  const Texture snakeTexture = LoadTexture(snakeTexturePath);
 
-    if (!IsTextureValid(snakeTexture)) {
-        printf("\033[31mERROR: Texture could not be loaded\033[0m\n");
-        return 1;
-    }
+  if (!IsTextureValid(snakeTexture)) {
+    printf("\033[31mERROR: Snake texture could not be loaded\033[0m\n");
+    return 1;
+  }
 
-    struct Snake *snake = initSnake(snakeTexturePath, snakeTexture);
-    if (snake == NULL) {
-        printf("\033[31mERROR: Snake could not be loaded\033[0m\n");
-        free(snake);
-        return 1;
-    }
+  struct Snake *snake = initSnake(snakeTexturePath, snakeTexture);
+  if (snake == NULL) {
+    printf("\033[31mERROR: Snake could not be loaded\033[0m\n");
+    free(snake);
+    return 1;
+  }
 
-    const char* appleTexturePath = "../assets/apple.png";
-    const Texture appleTexture = LoadTexture(appleTexturePath);
+  const char *appleTexturePath = "assets/apple.png";
+  const Texture appleTexture = LoadTexture(appleTexturePath);
 
-    if (!IsTextureValid(appleTexture)) {
-        printf("\033[31mERROR: Texture could not be loaded\033[0m\n");
-        free(snake);
-        return 1;
-    }
+  if (!IsTextureValid(appleTexture)) {
+    printf("\033[31mERROR: Apple texture could not be loaded\033[0m\n");
+    free(snake);
+    return 1;
+  }
 
-    struct Apple* apple = initApple(appleTexturePath, appleTexture);
-    if (apple == NULL) {
-        printf("\033[31mERROR: Apple could not be loaded\033[0m\n");
-        free(snake);
-        free(apple);
-        return 1;
-    }
-
-    while (!WindowShouldClose() && window.gameRunning) {
-        moveSnake(snake);
-        checkWallCollision(snake);
-
-        BeginDrawing();
-
-        ClearBackground(BLACK);
-        drawSnake(snake);
-        DrawFPS(0, 0);
-
-        EndDrawing();
-    }
-
+  struct Apple *apple = initApple(appleTexturePath, appleTexture);
+  if (apple == NULL) {
+    printf("\033[31mERROR: Apple could not be loaded\033[0m\n");
     free(snake);
     free(apple);
-    CloseWindow();
+    return 1;
+  }
+
+  while (!WindowShouldClose() && window.gameRunning) {
+    moveSnake(snake);
+    checkWallCollision(snake);
+
+    BeginDrawing();
+
+    ClearBackground(BLACK);
+    drawSnake(snake);
+    DrawFPS(0, 0);
+
+    EndDrawing();
+  }
+
+  free(snake);
+  free(apple);
+  CloseWindow();
 }
 
 struct Snake *initSnake(const char *texturePath, const Texture texture) {
-    struct Snake *snake = malloc(sizeof(struct Snake) + (sizeof(struct SnakeSegment) * (WIDTH * HEIGHT)));
-    for (int i = 0; i < (WIDTH * HEIGHT); i++) {
-        const struct SnakeSegment newSnakeSegment = {
-            .position = (Vector2){((float)i * TILE_SIZE) + (TILE_SIZE * 7), (TILE_SIZE * 7)},
-            .texturePath = texturePath,
-            .texture = texture,
-        };
-        snake->segments[i] = newSnakeSegment;
-    }
-    snake->segmentCount = 4;
-    return snake;
+  struct Snake *snake = malloc(
+      sizeof(struct Snake) + (sizeof(struct SnakeSegment) * (WIDTH * HEIGHT)));
+  for (int i = 0; i < (WIDTH * HEIGHT); i++) {
+    const struct SnakeSegment newSnakeSegment = {
+        .position = (Vector2){((float)i * TILE_SIZE) + (TILE_SIZE * 7),
+                              (TILE_SIZE * 7)},
+        .texturePath = texturePath,
+        .texture = texture,
+    };
+    snake->segments[i] = newSnakeSegment;
+  }
+  snake->segmentCount = 4;
+  return snake;
 }
 
 void drawSnake(const struct Snake *snake) {
-    if (snake == NULL) {
-        return;
-    }
-    for (int i = 1; i < snake->segmentCount; i++) {
-        DrawTextureRec(snake->segments[i].texture, (Rectangle){snake->segments[i].position.x, snake->segments[i].position.y, TILE_SIZE, TILE_SIZE}, snake->segments[i].position, DARKGREEN);
-    }
-    DrawTextureRec(snake->segments[0].texture, (Rectangle){snake->segments[0].position.x, snake->segments[0].position.y, TILE_SIZE, TILE_SIZE}, snake->segments[0].position, WHITE);
+  if (snake == NULL) {
+    return;
+  }
+  for (int i = 1; i < snake->segmentCount; i++) {
+    DrawTextureRec(snake->segments[i].texture,
+                   (Rectangle){snake->segments[i].position.x,
+                               snake->segments[i].position.y, TILE_SIZE,
+                               TILE_SIZE},
+                   snake->segments[i].position, DARKGREEN);
+  }
+  DrawTextureRec(snake->segments[0].texture,
+                 (Rectangle){snake->segments[0].position.x,
+                             snake->segments[0].position.y, TILE_SIZE,
+                             TILE_SIZE},
+                 snake->segments[0].position, WHITE);
 }
 
 void moveSnake(struct Snake *snake) {
-    if (snake == NULL) {
-        return;
-    }
-    for (int i = 9; i > 0; i--) {
-        snake->segments[i].position = snake->segments[i - 1].position;
-    }
-    if (IsKeyDown(KEY_W)) {
-        snake->movementDirection = 0;
-    } else if (IsKeyDown(KEY_S)) {
-        snake->movementDirection = 2;
-    } else if (IsKeyDown(KEY_A)) {
-        snake->movementDirection = 1;
-    } else if (IsKeyDown(KEY_D)) {
-        snake->movementDirection = 3;
-    }
-    switch (snake->movementDirection) {
-        case 0:
-            snake->segments[0].position.y -= TILE_SIZE;
-            break;
-        case 1:
-            snake->segments[0].position.x -= TILE_SIZE;
-            break;
-        case 2:
-            snake->segments[0].position.y += TILE_SIZE;
-            break;
-        case 3:
-            snake->segments[0].position.x += TILE_SIZE;
-            break;
-        default:
-            break;
-    }
+  if (snake == NULL) {
+    return;
+  }
+  for (int i = 9; i > 0; i--) {
+    snake->segments[i].position = snake->segments[i - 1].position;
+  }
+  if (IsKeyDown(KEY_W)) {
+    snake->movementDirection = 0;
+  } else if (IsKeyDown(KEY_S)) {
+    snake->movementDirection = 2;
+  } else if (IsKeyDown(KEY_A)) {
+    snake->movementDirection = 1;
+  } else if (IsKeyDown(KEY_D)) {
+    snake->movementDirection = 3;
+  }
+  switch (snake->movementDirection) {
+  case 0:
+    snake->segments[0].position.y -= TILE_SIZE;
+    break;
+  case 1:
+    snake->segments[0].position.x -= TILE_SIZE;
+    break;
+  case 2:
+    snake->segments[0].position.y += TILE_SIZE;
+    break;
+  case 3:
+    snake->segments[0].position.x += TILE_SIZE;
+    break;
+  default:
+    break;
+  }
 }
 
 void checkWallCollision(const struct Snake *snake) {
-    if (snake == NULL) {
-        return;
-    }
-    if (snake->segments[0].position.x == 0) {
-        window.gameRunning = false;
-    }
-    if (snake->segments[0].position.x + TILE_SIZE == WIDTH) {
-        window.gameRunning = false;
-    }
-    if (snake->segments[0].position.y == 0) {
-        window.gameRunning = false;
-    }
-    if (snake->segments[0].position.y + TILE_SIZE == HEIGHT) {
-        window.gameRunning = false;
-    }
+  if (snake == NULL) {
+    return;
+  }
+  if (snake->segments[0].position.x == 0) {
+    window.gameRunning = false;
+  }
+  if (snake->segments[0].position.x + TILE_SIZE == WIDTH) {
+    window.gameRunning = false;
+  }
+  if (snake->segments[0].position.y == 0) {
+    window.gameRunning = false;
+  }
+  if (snake->segments[0].position.y + TILE_SIZE == HEIGHT) {
+    window.gameRunning = false;
+  }
 }
 
-
 struct Apple *initApple(const char *texturePath, Texture texture) {
-    struct Apple* apple = malloc(sizeof(struct Apple));
-    return apple;
+  struct Apple *apple = malloc(sizeof(struct Apple));
+  return apple;
 }
