@@ -34,7 +34,13 @@ struct Snake {
     struct SnakeSegment segments[];
 };
 
-struct Snake *InitSnake(const char *texturePath, Texture texture);
+struct Apple {
+    Vector2 position;
+    const char *texturePath;
+    Texture texture;
+};
+
+struct Snake *initSnake(const char *texturePath, Texture texture);
 
 void drawSnake(const struct Snake *snake);
 
@@ -42,21 +48,41 @@ void moveSnake(struct Snake *snake);
 
 void checkWallCollision(const struct Snake *snake);
 
+struct Apple *initApple(const char *texturePath, Texture texture);
+
 int main(void) {
     InitWindow(window.width, window.height, window.name);
     SetTargetFPS(5);
 
-    const char *texturePath = "../assets/snake-body.png";
-    const Texture texture = LoadTexture(texturePath);
+    const char *snakeTexturePath = "../assets/snake-body.png";
+    const Texture snakeTexture = LoadTexture(snakeTexturePath);
 
-    if (!IsTextureValid(texture)) {
+    if (!IsTextureValid(snakeTexture)) {
         printf("\033[31mERROR: Texture could not be loaded\033[0m\n");
         return 1;
     }
 
-    struct Snake *snake = InitSnake(texturePath, texture);
+    struct Snake *snake = initSnake(snakeTexturePath, snakeTexture);
     if (snake == NULL) {
         printf("\033[31mERROR: Snake could not be loaded\033[0m\n");
+        free(snake);
+        return 1;
+    }
+
+    const char* appleTexturePath = "../assets/apple.png";
+    const Texture appleTexture = LoadTexture(appleTexturePath);
+
+    if (!IsTextureValid(appleTexture)) {
+        printf("\033[31mERROR: Texture could not be loaded\033[0m\n");
+        free(snake);
+        return 1;
+    }
+
+    struct Apple* apple = initApple(appleTexturePath, appleTexture);
+    if (apple == NULL) {
+        printf("\033[31mERROR: Apple could not be loaded\033[0m\n");
+        free(snake);
+        free(apple);
         return 1;
     }
 
@@ -74,10 +100,11 @@ int main(void) {
     }
 
     free(snake);
+    free(apple);
     CloseWindow();
 }
 
-struct Snake *InitSnake(const char *texturePath, const Texture texture) {
+struct Snake *initSnake(const char *texturePath, const Texture texture) {
     struct Snake *snake = malloc(sizeof(struct Snake) + (sizeof(struct SnakeSegment) * (WIDTH * HEIGHT)));
     for (int i = 0; i < (WIDTH * HEIGHT); i++) {
         const struct SnakeSegment newSnakeSegment = {
@@ -151,4 +178,10 @@ void checkWallCollision(const struct Snake *snake) {
     if (snake->segments[0].position.y + TILE_SIZE == HEIGHT) {
         window.gameRunning = false;
     }
+}
+
+
+struct Apple *initApple(const char *texturePath, Texture texture) {
+    struct Apple* apple = malloc(sizeof(struct Apple));
+    return apple;
 }
